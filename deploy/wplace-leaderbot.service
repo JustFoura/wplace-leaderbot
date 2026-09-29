@@ -1,0 +1,30 @@
+[Unit]
+Description=Wplace Leaderbot Discord service
+StartLimitIntervalSec=5min
+StartLimitBurst=5
+
+[Service]
+Type=simple
+WorkingDirectory=%h/wplace-leaderbot
+ExecStart=%h/wplace-leaderbot/.venv/bin/python bot.py
+Restart=on-failure
+RestartSec=10s
+TimeoutStopSec=30s
+UMask=0077
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=wplace-leaderbot
+LogRateLimitIntervalSec=30s
+LogRateLimitBurst=100
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=%h/wplace-leaderbot/data
+MemoryMax=512M
+CPUQuota=50%
+TasksMax=64
+
+[Install]
+WantedBy=default.target

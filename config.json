@@ -1,0 +1,12 @@
+{
+  "alliance_name": "Example Alliance",
+  "zones": [101, 202],
+  "known_region_ids": {},
+  "country_ids": [1],
+  "timezone": "UTC",
+  "daily_report_time": "23:45",
+  "report_mode": "today",
+  "default_mode": "today",
+  "stale_snapshot_hours": 6,
+  "data_dir": "data"
+}

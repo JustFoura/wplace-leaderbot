@@ -1,0 +1,12 @@
+[project]
+name = "wplace-leaderbot"
+version = "0.1.0"
+description = "Discord bot for scheduled Wplace leaderboard reports across configurable zones"
+requires-python = ">=3.12"
+dependencies = [
+    "discord.py>=2.4",
+    "aiohttp>=3.9",
+]
+
+[tool.ruff]
+line-length = 110

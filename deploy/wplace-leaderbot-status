@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -u
+
+service_state="$(systemctl --user is-active wplace-leaderbot.service 2>/dev/null || true)"
+data_dir="${HOME}/wplace-leaderbot/data"
+snapshot_file="${data_dir}/snapshots.json"
+snapshot_count="?"
+snapshot_bytes=0
+
+if [[ -r "$snapshot_file" ]]; then
+  snapshot_count="$(jq -r '.snapshots | length' "$snapshot_file" 2>/dev/null || printf '?')"
+  snapshot_bytes="$(stat -c '%s' "$snapshot_file" 2>/dev/null || printf '0')"
+fi
+
+snapshot_kib=$(( (snapshot_bytes + 1023) / 1024 ))
+case "$service_state" in
+  active)
+    label='LB ●'
+    status_class='active'
+    ;;
+  activating|reloading)
+    label='LB ◌'
+    status_class=''
+    ;;
+  *)
+    label='LB ○'
+    status_class=''
+    service_state="${service_state:-unknown}"
+    ;;
+esac
+
+printf -v tooltip 'Wplace Leaderbot: %s\nSnapshots: %s/10000 (%s KiB)' \
+  "$service_state" "$snapshot_count" "$snapshot_kib"
+jq -cn --arg text "$label" --arg tooltip "$tooltip" --arg class "$status_class" \
+  '{text: $text, tooltip: $tooltip, class: $class}'

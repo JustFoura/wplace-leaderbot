@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -u
+
+service='wplace-leaderbot.service'
+state="$(systemctl --user is-active "$service" 2>/dev/null || true)"
+interactive=false
+if [[ "${1:-}" == '--interactive' ]]; then interactive=true; fi
+
+case "$state" in
+  active) action='Stop bot' ;;
+  *) action='Start bot' ;;
+esac
+
+mapfile -t recent < <(
+  journalctl --user -u "$service" --since '24 hours ago' -o cat --no-pager 2>/dev/null \
+    | sed -n 's/.*WPLACE_REQUEST path=\([^ ]*\) status=\([0-9][0-9]*\).*/\2  \1/p' \
+    | tail -n 5
+)
+if ((${#recent[@]})); then
+  recent_lines=()
+  for ((i=${#recent[@]}-1; i>=0; i--)); do recent_lines+=("${recent[i]}"); done
+else
+  recent_lines=('No recent Wplace requests')
+fi
+
+if ! $interactive && command -v rofi >/dev/null 2>&1; then
+  choice="$(printf '%s\n' "$action" 'Recent requests (latest 5)' "${recent_lines[@]}" | rofi -dmenu -i -p 'Wplace bot' || true)"
+else
+  if ! $interactive; then
+    launcher="$(command -v omarchy-launch-floating-terminal-with-presentation || true)"
+    if [[ -z "$launcher" ]]; then
+      notify-send 'Wplace Leaderbot' 'Install rofi or Omarchy floating terminal launcher to open the menu.' 2>/dev/null || true
+      exit 1
+    fi
+    exec "$launcher" "$0" --interactive
+  fi
+
+  printf 'Wplace Leaderbot\n\n%s\n\nRecent requests (latest 5):\n' "$action"
+  printf '  %s\n' "${recent_lines[@]}"
+  printf '\nChoose an action [s=start, x=stop, q=close]: '
+  IFS= read -r answer || answer='q'
+  case "$answer" in
+    s|S) choice='Start bot' ;;
+    x|X) choice='Stop bot' ;;
+    *) choice='' ;;
+  esac
+fi
+
+case "$choice" in
+  'Stop bot') systemctl --user stop "$service" ;;
+  'Start bot') systemctl --user start "$service" ;;
+esac

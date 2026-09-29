@@ -1,0 +1,16 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# temporary/editor files
+*.tmp
+.DS_Store
+
+# runtime state; configure locally and keep it out of public history
+data/
+
+# python
+.venv/
+__pycache__/
+*.pyc
