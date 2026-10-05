@@ -129,9 +129,8 @@ def build_zone_embed(snapshot: dict, config: Config, zone: int):
             tag = f" · {p['alliance_name']}" if p['alliance_name'] else ''
             plines.append(f"{_rank_label(p['rank'])}. {name} — {p['pixels']:,}{tag}")
     embed.add_field(name='Top painters', value='\n'.join(plines) if plines else 'No painters on the board.', inline=False)
-    footer = f'Collected {_format_collected(snapshot, config)}'
-    footer += f' · {ALLIANCE_MARKER} = configured alliance'
-    embed.set_footer(text=footer)
+    embed.add_field(name='Legend', value=f'{ALLIANCE_MARKER} = configured alliance', inline=False)
+    embed.set_footer(text=f'Collected {_format_collected(snapshot, config)}')
     return embed
 
 def build_embed(snapshot: dict, config: Config, zone_filter: int | None=None, previous: dict | None=None):
